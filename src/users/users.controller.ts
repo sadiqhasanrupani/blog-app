@@ -1,95 +1,60 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Post,
-  Put,
-  Query,
-  Req,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-import { Request } from 'express';
-import { Gender, UsersService } from './users.service';
-import { CreateUserDto, UserBody } from './dtos/create-user.dto';
+import { UsersService } from './providers/users.service';
 
-type GetUserQuery = {
-  name: string;
-  age: number;
-};
-
-type PutUserbody = {
-  age: number;
-  gender: Gender;
-};
-
-const users: UserBody[] = [
-  {
-    firstName: 'Sadiqhasan',
-    lastName: 'Rupani',
-    email: 'sadiqhasanrupani11@gmail.com',
-    password: 'Sadiq@123',
-    id: 1,
-  },
-  {
-    firstName: 'Sidika',
-    lastName: 'Rupani',
-    email: 'sadiqhasanrupani11@gmail.com',
-    password: 'Sadiq@123',
-    id: 2,
-  },
-];
+import { CreateUserDto } from './dtos/create-user.dto';
+import { GetUsersParamDto } from './dtos/get-users-param.dto';
+import { PatchUserDto } from './dtos/patch-user.dto';
 
 @Controller('users')
+@ApiTags('Users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
-  @Get()
-  public getUsers(@Query() query: GetUserQuery) {
-    const response = this.usersService.getUsers(query, users);
+  @Get('/:id?')
+  @ApiOperation({ summary: 'Fetches a list of registered users on the application.' })
+  @ApiResponse({ status: 200, description: 'Users fetched successfully based on the documentation' })
+  @ApiResponse({ status: 400, description: 'Invalid user id will hit a based request' })
+  @ApiQuery({
+    name: 'limit',
+    type: 'number',
+    required: false,
+    description: 'The number of entries returned per query',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'page',
+    type: 'number',
+    required: false,
+    description: 'The position of the page number that you want the API to return',
+    example: 1,
+  })
+  public getUsers(
+    @Param() params: GetUsersParamDto,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+  ) {
+    if (params.id) {
+      return this.usersService.findOne(params.id);
+    }
 
+    const response = this.usersService.findAll();
     return response;
-  }
-
-  @Get('/:id')
-  public getUser(@Param('id', ParseIntPipe) id: number) {
-    return {
-      message: 'User got successfully',
-      user: users.find((user) => user.id === id),
-    };
   }
 
   @Post()
   public createUser(@Body() createUserDto: CreateUserDto) {
-    users.push(createUserDto);
-
     return {
       message: 'User created successfully',
-      users,
     };
   }
 
-  @Put('/:name')
-  public updateUser(
-    @Req() request: Request,
-    @Param('firstName') firstName: string,
-  ) {
-    const body: PutUserbody = request.body;
-
-    users.forEach((user, index) => {
-      if (user.firstName === firstName) {
-        users[index] = {
-          ...user,
-          ...body,
-        };
-      }
-    });
-
+  @Patch()
+  public patchUser(@Body() patchUserDto: PatchUserDto) {
     return {
       message: 'User updated successfully',
-      users,
+      patchUserDto,
     };
   }
 }

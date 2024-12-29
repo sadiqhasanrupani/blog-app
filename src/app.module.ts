@@ -3,13 +3,12 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-/*
- * create users module
- */
 import { UsersModule } from './users/users.module';
+import { PostModule } from './posts/posts.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [UsersModule],
+  imports: [UsersModule, PostModule, AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })
