@@ -119,6 +119,13 @@
         </p>
 
 
+            <p class="comment">
+                <h3>Description</h3>
+            </p>
+            <p class="comment">
+                <p>created a user service</p>
+
+            </p>
 
 
 
@@ -185,7 +192,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="6" class="link-to-prism">src/users/providers/users.service.ts:6</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="10" class="link-to-prism">src/users/providers/users.service.ts:10</a></div>
                             </td>
                         </tr>
 
@@ -250,14 +257,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="32"
-                                    class="link-to-prism">src/users/providers/users.service.ts:32</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="44"
+                                    class="link-to-prism">src/users/providers/users.service.ts:44</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>created a method findAll which finds all users detail</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>    <code>{}</code>
@@ -289,14 +298,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="41"
-                                    class="link-to-prism">src/users/providers/users.service.ts:41</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="57"
+                                    class="link-to-prism">src/users/providers/users.service.ts:57</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>created a method findOne which finds one user detail based on their correct id.</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -358,14 +369,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="45"
-                                    class="link-to-prism">src/users/providers/users.service.ts:45</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="65"
+                                    class="link-to-prism">src/users/providers/users.service.ts:65</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>created a method findOne which finds one user detail based on their correct email id.</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -451,10 +464,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="15" class="link-to-prism">src/users/providers/users.service.ts:15</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="23" class="link-to-prism">src/users/providers/users.service.ts:23</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>created a static user array of object</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -468,6 +487,10 @@
 import { UserBody } from &#x27;../dtos/create-user.dto&#x27;;
 import { AuthService } from &#x27;src/auth/providers/auth.service&#x27;;
 
+/**
+ * created a user service
+ * @class
+ */
 @Injectable()
 export class UsersService {
   constructor(
@@ -476,8 +499,12 @@ export class UsersService {
      */
     @Inject(forwardRef(() &#x3D;&gt; AuthService))
     private readonly authService: AuthService,
-  ) {}
+  ) { }
 
+  /**
+   * created a static user array of object 
+   * @property
+   */
   private users: UserBody[] &#x3D; [
     {
       firstName: &#x27;Sadiqhasan&#x27;,
@@ -495,6 +522,10 @@ export class UsersService {
     },
   ];
 
+  /**
+   * created a method findAll which finds all users detail
+   * @function
+   */
   public findAll() {
     const isAuth &#x3D; this.authService.isAuth();
     if (!isAuth) {
@@ -504,10 +535,18 @@ export class UsersService {
     return this.users;
   }
 
+  /**
+   * created a method findOne which finds one user detail based on their correct id.
+   * @function
+   */
   public findOne(id: number) {
     return this.users.find((user) &#x3D;&gt; user.id &#x3D;&#x3D;&#x3D; id);
   }
 
+  /**
+   * created a method findOne which finds one user detail based on their correct email id.
+   * @function
+   */
   public findOneByEmail(email: string) {
     return this.users.find((user) &#x3D;&gt; user.email &#x3D;&#x3D;&#x3D; email);
   }

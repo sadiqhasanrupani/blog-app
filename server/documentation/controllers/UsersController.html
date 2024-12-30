@@ -123,6 +123,13 @@
             </p>
 
 
+            <p class="comment">
+                <h3>Description</h3>
+            </p>
+            <p class="comment">
+                <p>created a user controller</p>
+
+            </p>
 
 
 
@@ -207,14 +214,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="47"
-                                    class="link-to-prism">src/users/users.controller.ts:47</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="59"
+                                    class="link-to-prism">src/users/users.controller.ts:59</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>created a user function that will create a new user</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -289,14 +298,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="33"
-                                    class="link-to-prism">src/users/users.controller.ts:33</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="41"
+                                    class="link-to-prism">src/users/users.controller.ts:41</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>created a user function that will fetch all the users</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -390,14 +401,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="54"
-                                    class="link-to-prism">src/users/users.controller.ts:54</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="70"
+                                    class="link-to-prism">src/users/users.controller.ts:70</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>created a user function that will update a user</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -450,11 +463,19 @@ import { CreateUserDto } from &#x27;./dtos/create-user.dto&#x27;;
 import { GetUsersParamDto } from &#x27;./dtos/get-users-param.dto&#x27;;
 import { PatchUserDto } from &#x27;./dtos/patch-user.dto&#x27;;
 
+/**
+ * created a user controller
+ * @class
+ */
 @Controller(&#x27;users&#x27;)
 @ApiTags(&#x27;Users&#x27;)
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
+  /**
+   * created a user function that will fetch all the users
+   * @function
+   */
   @Get(&#x27;/:id?&#x27;)
   @ApiOperation({ summary: &#x27;Fetches a list of registered users on the application.&#x27; })
   @ApiResponse({ status: 200, description: &#x27;Users fetched successfully based on the documentation&#x27; })
@@ -486,6 +507,10 @@ export class UsersController {
     return response;
   }
 
+  /**
+   * created a user function that will create a new user
+   * @function
+   */
   @Post()
   public createUser(@Body() createUserDto: CreateUserDto) {
     return {
@@ -493,6 +518,10 @@ export class UsersController {
     };
   }
 
+  /**
+   * created a user function that will update a user
+   * @function
+   */
   @Patch()
   public patchUser(@Body() patchUserDto: PatchUserDto) {
     return {

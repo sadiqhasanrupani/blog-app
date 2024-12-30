@@ -119,6 +119,13 @@
         </p>
 
 
+            <p class="comment">
+                <h3>Description</h3>
+            </p>
+            <p class="comment">
+                <p>created a auth service</p>
+
+            </p>
 
 
 
@@ -166,7 +173,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="5" class="link-to-prism">src/auth/providers/auth.service.ts:5</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="9" class="link-to-prism">src/auth/providers/auth.service.ts:9</a></div>
                             </td>
                         </tr>
 
@@ -231,14 +238,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="24"
-                                    class="link-to-prism">src/auth/providers/auth.service.ts:24</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="37"
+                                    class="link-to-prism">src/auth/providers/auth.service.ts:37</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>created a isAuth method to authenticate application users</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/boolean" target="_blank" >boolean</a></code>
@@ -263,21 +272,23 @@
             <tr>
                 <td class="col-md-4">
                         <span class="modifier-icon icon ion-ios-reset"></span>
-                    <code>login(email: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, password: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
+                    <code>login(email: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>, _: <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank">string</a>)</code>
                 </td>
             </tr>
 
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="14"
-                                    class="link-to-prism">src/auth/providers/auth.service.ts:14</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="23"
+                                    class="link-to-prism">src/auth/providers/auth.service.ts:23</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>created a login method to login application users</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -304,7 +315,7 @@
 
                                         </tr>
                                         <tr>
-                                                <td>password</td>
+                                                <td>_</td>
                                             <td>
                                                             <code><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/string" target="_blank" >string</a></code>
                                             </td>
@@ -338,17 +349,26 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable, Inject, forwardRef } from &#x27;@nestjs/common&#x27;;
 import { UsersService } from &#x27;src/users/providers/users.service&#x27;;
 
+/**
+ * created a auth service
+ * @class
+ */
 @Injectable()
 export class AuthService {
   constructor(
     /*
      * Injecting UserService
+     * @constructor
      */
     @Inject(forwardRef(() &#x3D;&gt; UsersService))
     private readonly userService: UsersService,
-  ) {}
+  ) { }
 
-  public login(email: string, password: string) {
+  /**
+   * created a login method to login application users
+   * @function
+   */
+  public login(email: string, _: string) {
     const isUser &#x3D; this.userService.findOneByEmail(email);
 
     if (!isUser) {
@@ -358,6 +378,10 @@ export class AuthService {
     return { message: &#x27;Logged in successfully.&#x27;, token: &#x27;SECRET_TOKEN&#x27; };
   }
 
+  /**
+   * created a isAuth method to authenticate application users
+   * @function
+   */
   public isAuth() {
     return true;
   }

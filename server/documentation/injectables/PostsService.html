@@ -119,6 +119,13 @@
         </p>
 
 
+            <p class="comment">
+                <h3>Description</h3>
+            </p>
+            <p class="comment">
+                <p>created a post service</p>
+
+            </p>
 
 
 
@@ -161,7 +168,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="5" class="link-to-prism">src/posts/providers/posts.service.ts:5</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="9" class="link-to-prism">src/posts/providers/posts.service.ts:9</a></div>
                             </td>
                         </tr>
 
@@ -224,14 +231,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="13"
-                                    class="link-to-prism">src/posts/providers/posts.service.ts:13</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="22"
+                                    class="link-to-prism">src/posts/providers/posts.service.ts:22</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>created a method findAll which finds all posts detail</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -280,16 +289,30 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Injectable } from &#x27;@nestjs/common&#x27;;
 import { UsersService } from &#x27;src/users/providers/users.service&#x27;;
 
+/**
+ * created a post service
+ * @class
+ */
 @Injectable()
 export class PostsService {
   constructor(
-    /*
+    /**
      * Injected Users Service
+     * @constructor
      */
     private readonly userService: UsersService,
   ) { }
 
+  /**
+   * created a method findAll which finds all posts detail
+   * @function
+   */
   findAll(userId: number) {
+    /**
+     * Injected user service findone method to find user detail
+     * based on their id.
+     * @function
+     */
     const user &#x3D; this.userService.findOne(userId);
 
     if (!user) {

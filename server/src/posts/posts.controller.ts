@@ -7,16 +7,28 @@ import { GetPostsParamDto } from './dtos/get-posts-param.dto';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { PatchPostDto } from './dtos/patch-post.dto';
 
+/**
+ * created a post controller
+ * @class
+ */
 @Controller('posts')
 @ApiTags('Posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
+  /**
+   * created a findAll method that will find all posts based on their id.
+   * @function
+   */
   @Get('/:userId?')
   findAll(@Param() getPostsParamDto: GetPostsParamDto) {
     return this.postsService.findAll(getPostsParamDto.userId);
   }
 
+  /**
+   * created a createPost method that will create a new post
+   * @function
+   */
   @ApiOperation({
     summary: 'Creates a new post',
   })
@@ -31,6 +43,10 @@ export class PostsController {
     };
   }
 
+  /**
+   * created a patchPost method that will update a existing post
+   * @function
+   */
   @ApiOperation({
     summary: 'Updates a existing post',
   })

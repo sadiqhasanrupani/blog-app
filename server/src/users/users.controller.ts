@@ -7,11 +7,19 @@ import { CreateUserDto } from './dtos/create-user.dto';
 import { GetUsersParamDto } from './dtos/get-users-param.dto';
 import { PatchUserDto } from './dtos/patch-user.dto';
 
+/**
+ * created a user controller
+ * @class
+ */
 @Controller('users')
 @ApiTags('Users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  /**
+   * created a user function that will fetch all the users
+   * @function
+   */
   @Get('/:id?')
   @ApiOperation({ summary: 'Fetches a list of registered users on the application.' })
   @ApiResponse({ status: 200, description: 'Users fetched successfully based on the documentation' })
@@ -43,13 +51,21 @@ export class UsersController {
     return response;
   }
 
+  /**
+   * created a user function that will create a new user
+   * @function
+   */
   @Post()
   public createUser(@Body() createUserDto: CreateUserDto) {
-    return {
-      message: 'User created successfully',
-    };
+    const response = this.usersService.createUser(createUserDto);
+
+    return response;
   }
 
+  /**
+   * created a user function that will update a user
+   * @function
+   */
   @Patch()
   public patchUser(@Body() patchUserDto: PatchUserDto) {
     return {
