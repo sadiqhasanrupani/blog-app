@@ -1,11 +1,26 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-import { CreatePostMetaOptionsDto } from '../meta-options/dtos/create-post-meta-options.dto';
 import { postType } from './enums/postType.enum';
 import { status } from './enums/status.enum';
 
+import { MetaOption } from 'src/meta-options/meta-option.entity';
+import { User } from 'src/users/user.entity';
+
+/**
+ * post entity
+ * @class
+ * */
 @Entity()
-export class Posts {
+export class Post {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -17,6 +32,7 @@ export class Posts {
   title: string;
 
   @Column({
+    name: 'post_type',
     type: 'enum',
     default: postType.POST,
     enum: postType,
@@ -60,19 +76,8 @@ export class Posts {
   })
   featuredImageUrl?: string;
 
-  // work on these in relationship
-  @Column({
-    type: 'simple-array',
-    nullable: true,
-  })
-  tags?: string[];
-
-  @Column({
-    name: 'meta_options',
-    type: 'json',
-    nullable: true,
-  })
-  metaOptions?: CreatePostMetaOptionsDto[];
+  @OneToOne(() => MetaOption, (metaOption) => metaOption.post)
+  metaOptions?: MetaOption;
 
   @Column({
     name: 'publish_on',
@@ -80,6 +85,10 @@ export class Posts {
     nullable: true,
   })
   publishOn?: Date;
+
+  @ManyToOne(() => User, (user) => user.posts)
+  @JoinColumn({ name: 'author_id' })
+  author: User;
 
   @CreateDateColumn({
     name: 'created_at',

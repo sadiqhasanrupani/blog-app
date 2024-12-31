@@ -11,15 +11,17 @@ import { PostModule } from './posts/posts.module';
 import { AuthModule } from './auth/auth.module';
 
 // entities
-import { User } from './users/user.entity';
 import { TagsModule } from './tags/tags.module';
 import { MetaOptionsModule } from './meta-options/meta-options.module';
+import { DrizzleModule } from './drizzle/drizzle.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
     UsersModule,
     PostModule,
     AuthModule,
+    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [],
       inject: [],
@@ -37,6 +39,7 @@ import { MetaOptionsModule } from './meta-options/meta-options.module';
     }),
     TagsModule,
     MetaOptionsModule,
+    DrizzleModule,
   ],
   controllers: [AppController],
   providers: [AppService],

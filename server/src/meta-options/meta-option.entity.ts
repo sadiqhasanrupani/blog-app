@@ -1,9 +1,23 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
 
+import { Post } from 'src/posts/post.entity';
+
+/**
+ * an entity of meta_options table
+ * @class
+ * */
 @Entity()
-export class MetaOptions {
+export class MetaOption {
   @PrimaryGeneratedColumn()
-  id: number;
+  id?: number;
 
   @Column({
     name: 'meta_value',
@@ -12,9 +26,13 @@ export class MetaOptions {
   })
   metaValue: string;
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @OneToOne(() => Post, (post) => post.metaOptions, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'post_id' })
+  post: Post;
 
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt?: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt?: Date;
 }

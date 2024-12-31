@@ -5,7 +5,7 @@ import { IsNotEmpty, IsJSON } from 'class-validator';
  * CreatePost Data transfer object
  * @class
  * */
-export class CreatePostMetaOptionsDto {
+export class CreateMetaOptionsDto {
   @ApiProperty({
     name: 'metaValue',
     type: 'string',
