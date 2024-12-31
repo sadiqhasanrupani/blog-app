@@ -32,7 +32,7 @@ export const paths = {
  * */
 export default defineConfig({
   schema: './src/drizzle/schema/schema.ts',
-  out: './src/drizzle/schema/',
+  out: './src/drizzle/schema',
   dialect: 'postgresql',
   dbCredentials: {
     url: process.env.DATABASE_URL,
