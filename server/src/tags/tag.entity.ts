@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Column } from 'typeorm';
 
 @Entity()
-export class Tags {
+export class Tag {
   @PrimaryGeneratedColumn()
   id: number;
 
