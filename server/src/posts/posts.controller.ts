@@ -43,7 +43,7 @@ export class PostsController {
   }
 
   /**
-   * created a patchPost method that will update a existing post
+   * @method that will update a existing post
    * @function
    */
   @ApiOperation({
@@ -54,10 +54,8 @@ export class PostsController {
     description: 'This request returns 200 status when a post is updated successfully.',
   })
   @Patch()
-  public patchPost(@Body() patchPostDto: PatchPostDto) {
-    return {
-      patchPostDto,
-    };
+  public updatePost(@Body() patchPostDto: PatchPostDto) {
+    return this.postsService.update(patchPostDto);
   }
 
   /**

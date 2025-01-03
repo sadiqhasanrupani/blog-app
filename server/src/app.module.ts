@@ -18,10 +18,6 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    UsersModule,
-    PostModule,
-    AuthModule,
-    ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({
       imports: [],
       inject: [],
@@ -37,6 +33,10 @@ import { ConfigModule } from '@nestjs/config';
         // entities: [User],
       }),
     }),
+    ConfigModule.forRoot({ isGlobal: true }),
+    UsersModule,
+    PostModule,
+    AuthModule,
     TagsModule,
     MetaOptionsModule,
     DrizzleModule,
@@ -44,4 +44,4 @@ import { ConfigModule } from '@nestjs/config';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

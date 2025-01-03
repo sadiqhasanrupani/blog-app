@@ -1,5 +1,9 @@
 import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Column } from 'typeorm';
 
+/** 
+ * Tag Entity
+ * @entity
+ * */
 @Entity()
 export class Tag {
   @PrimaryGeneratedColumn()

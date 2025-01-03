@@ -5,6 +5,10 @@ import { MetaOptionsController } from './meta-options.controller';
 import { MetaOption } from './meta-option.entity';
 import { MetaOptionsService } from './providers/meta-options.service';
 
+/** 
+ * MetaOptions Module
+ * @module
+ * */
 @Module({
   controllers: [MetaOptionsController],
   imports: [TypeOrmModule.forFeature([MetaOption])],

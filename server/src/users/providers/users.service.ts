@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { User } from '../user.entity';
 
-import { CreateUserDto, UserBody } from '../dtos/create-user.dto';
+import { CreateUserDto } from '../dtos/create-user.dto';
 import { AuthService } from 'src/auth/providers/auth.service';
 
 /**
@@ -25,7 +25,7 @@ export class UsersService {
      * */
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+  ) { }
 
   /**
    * 1. Checks for existing user with same email
@@ -55,28 +55,41 @@ export class UsersService {
    * created a method findAll which finds all users detail
    * @function
    */
-  public findAll() {
+  public async findAll() {
     const isAuth = this.authService.isAuth();
     if (!isAuth) {
-      return { message: 'Invalid user' };
+      return { message: 'Unauthorized User' };
     }
 
-    return [];
+    const users = await this.userRepository.find();
+    return users;
   }
 
   /**
    * created a method findOne which finds one user detail based on their correct id.
-   * @function
+   * @function to get user by ID.
+   * @returns false | Promise<User>
    */
-  public findOne(id: number) {
-    return [];
+  public async findOneById(id: number) {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      return false;
+    }
+
+    return user;
   }
 
   /**
    * created a method findOne which finds one user detail based on their correct email id.
-   * @function
+   * @function to get user by EmailId.
+   * @returns false | Promise<User>
    */
-  public findOneByEmail(email: string) {
-    return [];
+  public async findOneByEmail(email: string) {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (!user) {
+      return false;
+    }
+
+    return user;
   }
 }

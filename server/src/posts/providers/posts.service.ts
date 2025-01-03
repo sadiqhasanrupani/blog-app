@@ -1,18 +1,20 @@
 import { Body, Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { eq } from 'drizzle-orm';
 
 import { DrizzleDB } from 'src/drizzle/types/drizzle';
 
 // tables
-import { metaOption, post } from 'src/drizzle/schema/schema';
 import { Post } from '../post.entity';
 import { MetaOption } from 'src/meta-options/meta-option.entity';
 
 // others
 import { CreatePostDto } from '../dtos/create-post.dto';
 import { DRIZZLE } from 'src/drizzle/drizzle.module';
+import { UsersService } from 'src/users/providers/users.service';
+import { TagsService } from 'src/tags/providers/tags.service';
+import { PatchPostDto } from '../dtos/patch-post.dto';
+import { Tag } from 'src/tags/tag.entity';
 
 /**
  * created a post service
@@ -40,7 +42,19 @@ export class PostsService {
      * @constructor
      * */
     @InjectRepository(MetaOption)
-    public readonly metaOptionsRepository: Repository<MetaOption>,
+    private readonly metaOptionsRepository: Repository<MetaOption>,
+
+    /**
+     * Injecting TagsService
+     * @constructor
+     * */
+    private readonly tagsService: TagsService,
+
+    /**
+     * Injecting UserService
+     * @service
+     * */
+    private readonly userService: UsersService,
   ) {}
 
   /**
@@ -52,8 +66,16 @@ export class PostsService {
    * @returns response of created blog post
    * */
   public async create(@Body() createPostDto: CreatePostDto) {
+    // find author from database by authorId
+    const author = await this.userService.findOneById(1);
+    if (!author) {
+      return { message: "User doesn't exist" };
+    }
+
+    let tags = await this.tagsService.findMultipleTags(createPostDto.tags);
+
     let metaOption: MetaOption | null;
-    let newPost = this.postsRepository.create(createPostDto);
+    let newPost = this.postsRepository.create({ ...createPostDto, author, tags });
 
     newPost = await this.postsRepository.save(newPost);
 
@@ -74,15 +96,57 @@ export class PostsService {
    * @method to find all blog posts
    * */
   public async findAll() {
-    const posts = await this.db
-      .select({ postId: post.id, title: post.title })
-      .from(metaOption)
-      .innerJoin(post, eq(post.id, metaOption.postId));
+    const posts = await this.postsRepository.find({ relations: { author: true, metaOptions: true, tags: true } });
 
     return {
       message: 'Blog posts fetched successfully',
       posts,
     };
+  }
+
+  /**
+   * @method
+   *
+   * Updates a blog post as follows:
+   * 1. Find the Tags of the blog post
+   * 2. Find the Post
+   * 3. Update the Post
+   * 4. Assign the Tags to posts
+   * 5. Save the post and return response
+   * */
+  public async update(patchPostDto: PatchPostDto) {
+    // getting existing tags
+    let tags: Tag[];
+
+    if (patchPostDto.tags) {
+      tags = await this.tagsService.findMultipleTags(patchPostDto.tags);
+    }
+
+    // getting post's detail based on the post id.
+    let post = await this.postsRepository.findOneBy({ id: patchPostDto.id });
+
+    if (!post) {
+      return { message: "Post doesn't exist" };
+    }
+
+    // updating post properties
+    post.title = patchPostDto.title ?? post.title;
+    post.slug = patchPostDto.slug ?? post.slug;
+    post.status = patchPostDto.status ?? post.status;
+    post.content = patchPostDto.content ?? post.content;
+    post.schema = patchPostDto.schema ?? post.schema;
+    post.postType = patchPostDto.postType ?? post.postType;
+    post.featuredImageUrl = patchPostDto.featuredImageUrl ?? post.featuredImageUrl;
+    post.publishOn = patchPostDto.publishOn ?? post.publishOn;
+
+    // assigning tags to post object
+    post.tags = tags;
+
+    // saves the posts
+    post = await this.postsRepository.save(post);
+
+    // returns the post in response
+    return { message: 'updated the posts successfully.', post };
   }
 
   /**
@@ -92,20 +156,6 @@ export class PostsService {
    * @method to delete a blog post
    * */
   public async delete(id: number) {
-    // const posts = await this.db
-    //   .select({ id: post.id, metaOptionId: metaOption.id })
-    //   .from(metaOption)
-    //   .innerJoin(post, eq(post.id, metaOption.postId))
-    //   .where(eq(post.id, id));
-    //
-    // const existingPost = posts[0];
-    //
-    // if (!existingPost) {
-    //   return {
-    //     message: 'Blog post not found',
-    //   };
-    // }
-
     await this.postsRepository.delete(id);
     return { message: 'Post has been deleted' };
   }

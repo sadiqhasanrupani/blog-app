@@ -14,7 +14,7 @@ import { PatchUserDto } from './dtos/patch-user.dto';
 @Controller('users')
 @ApiTags('Users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   /**
    * created a user function that will fetch all the users
@@ -44,7 +44,7 @@ export class UsersController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
   ) {
     if (params.id) {
-      return this.usersService.findOne(params.id);
+      return this.usersService.findOneById(params.id);
     }
 
     const response = this.usersService.findAll();
