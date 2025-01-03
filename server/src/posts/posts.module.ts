@@ -20,4 +20,4 @@ import { TagsModule } from 'src/tags/tags.module';
   controllers: [PostsController],
   providers: [PostsService],
 })
-export class PostModule { }
+export class PostModule {}

@@ -1,6 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, Column } from 'typeorm';
+import { Post } from 'src/posts/post.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  DeleteDateColumn,
+  Column,
+  ManyToMany,
+} from 'typeorm';
 
-/** 
+/**
  * Tag Entity
  * @entity
  * */
@@ -42,6 +51,9 @@ export class Tag {
     nullable: true,
   })
   featuredImageUrl?: string;
+
+  @ManyToMany(() => Post, (post) => post.tags, { onDelete: 'CASCADE' })
+  post?: Post[];
 
   @CreateDateColumn({
     name: 'created_at',

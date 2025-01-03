@@ -1,24 +1,9 @@
-import { pgTable, unique, serial, varchar, text, timestamp, foreignKey, json, integer, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, unique, serial, json, timestamp, integer, varchar, text, index, primaryKey, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const postPostTypeEnum = pgEnum("post_post_type_enum", ['post', 'page', 'story', 'series'])
 export const postStatusEnum = pgEnum("post_status_enum", ['draft', 'scheduled', 'review', 'published'])
 
-
-export const tags = pgTable("tags", {
-	id: serial().primaryKey().notNull(),
-	name: varchar({ length: 100 }).notNull(),
-	slug: text().notNull(),
-	description: text(),
-	schema: text(),
-	featuredImageUrl: text("featured_image_url"),
-	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
-	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
-	deletedAt: timestamp("deleted_at", { mode: 'string' }),
-}, (table) => [
-	unique("UQ_d90243459a697eadb8ad56e9092").on(table.name),
-	unique("UQ_b3aa10c29ea4e61a830362bd25a").on(table.slug),
-]);
 
 export const metaOption = pgTable("meta_option", {
 	id: serial().primaryKey().notNull(),
@@ -65,4 +50,38 @@ export const user = pgTable("user", {
 	password: text().notNull(),
 }, (table) => [
 	unique("UQ_e12875dfb3b1d92d7d7c5377e22").on(table.email),
+]);
+
+export const tag = pgTable("tag", {
+	id: serial().primaryKey().notNull(),
+	name: varchar({ length: 100 }).notNull(),
+	slug: text().notNull(),
+	description: text(),
+	schema: text(),
+	featuredImageUrl: text("featured_image_url"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow().notNull(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow().notNull(),
+	deletedAt: timestamp("deleted_at", { mode: 'string' }),
+}, (table) => [
+	unique("UQ_6a9775008add570dc3e5a0bab7b").on(table.name),
+	unique("UQ_3413aed3ecde54f832c4f44f045").on(table.slug),
+]);
+
+export const postTagsTag = pgTable("post_tags_tag", {
+	postId: integer().notNull(),
+	tagId: integer().notNull(),
+}, (table) => [
+	index("IDX_41e7626b9cc03c5c65812ae55e").using("btree", table.tagId.asc().nullsLast().op("int4_ops")),
+	index("IDX_b651178cc41334544a7a9601c4").using("btree", table.postId.asc().nullsLast().op("int4_ops")),
+	foreignKey({
+			columns: [table.postId],
+			foreignColumns: [post.id],
+			name: "FK_b651178cc41334544a7a9601c45"
+		}).onUpdate("cascade").onDelete("cascade"),
+	foreignKey({
+			columns: [table.tagId],
+			foreignColumns: [tag.id],
+			name: "FK_41e7626b9cc03c5c65812ae55e8"
+		}).onUpdate("cascade").onDelete("cascade"),
+	primaryKey({ columns: [table.postId, table.tagId], name: "PK_e9b7b8e6a07bdccb6a954171676"}),
 ]);

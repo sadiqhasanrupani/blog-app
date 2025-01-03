@@ -14,7 +14,21 @@ import { DeletePostParamDto } from './dtos/delete-post-param.dto';
 @Controller('posts')
 @ApiTags('Posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(private readonly postsService: PostsService) { }
+
+  /**
+   * @method to get posts with tags
+   * @function
+   * */
+  @ApiOperation({ summary: 'Get posts with tags' })
+  @ApiResponse({
+    status: 200,
+    description: 'This request returns 200 status when posts with tags are fetched successfully.',
+  })
+  @Get('/tags')
+  public getPostsWithTags() {
+    return this.postsService.getAllTags();
+  }
 
   /**
    * created a findAll method that will find all posts based on their id.

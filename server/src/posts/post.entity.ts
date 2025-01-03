@@ -93,7 +93,7 @@ export class Post {
   @JoinColumn({ name: 'author_id' })
   author: User;
 
-  @ManyToMany(() => Tag)
+  @ManyToMany(() => Tag, (tag) => tag.post)
   @JoinTable()
   tags?: Tag[];
 

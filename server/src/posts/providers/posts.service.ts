@@ -1,6 +1,7 @@
 import { Body, Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { eq, sql } from 'drizzle-orm';
 
 import { DrizzleDB } from 'src/drizzle/types/drizzle';
 
@@ -15,6 +16,7 @@ import { UsersService } from 'src/users/providers/users.service';
 import { TagsService } from 'src/tags/providers/tags.service';
 import { PatchPostDto } from '../dtos/patch-post.dto';
 import { Tag } from 'src/tags/tag.entity';
+import { post, postTagsTag, tag } from 'src/drizzle/schema/schema';
 
 /**
  * created a post service
@@ -55,7 +57,35 @@ export class PostsService {
      * @service
      * */
     private readonly userService: UsersService,
-  ) {}
+  ) { }
+
+  /**
+   * Gets post related tags
+   * */
+  public async getAllTags() {
+    const postTags = await this.db
+      .select({
+        id: post.id,
+        title: post.title,
+        tags: sql`
+        json_agg(
+          json_build_object(
+            'id', tag.id,
+            'name', tag.name,
+            'slug', tag.slug,
+            'description', tag.description,
+            'schema', tag.schema
+          )
+        )
+      `,
+      })
+      .from(post)
+      .leftJoin(postTagsTag, eq(postTagsTag.postId, post.id))
+      .leftJoin(tag, eq(postTagsTag.tagId, tag.id))
+      .groupBy(post.id);
+
+    return postTags;
+  }
 
   /**
    * If metaOptions is provided, Creates a new meta option before creating a new blog post
@@ -164,5 +194,5 @@ export class PostsService {
    * Delete all blogs or in bulk
    * @method to delete all blog posts
    * */
-  public async deleteAll() {}
+  public async deleteAll() { }
 }
