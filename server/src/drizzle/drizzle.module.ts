@@ -21,7 +21,7 @@ export const DRIZZLE = Symbol('drizzle-connection');
       provide: DRIZZLE,
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        const databasURL = configService.get<string>('DATABASE_URL');
+        const databasURL = configService.get<string>('database.databaseUrl');
         const pool = new Pool({
           connectionString: databasURL,
           ssl: true,

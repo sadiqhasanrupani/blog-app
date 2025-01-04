@@ -16,29 +16,36 @@ import { TagsModule } from './tags/tags.module';
 import { MetaOptionsModule } from './meta-options/meta-options.module';
 import { DrizzleModule } from './drizzle/drizzle.module';
 
-import { appConfig } from './config/app.config';
+// configs
+import appConfig from './config/app.config';
+import databaseConfig from './config/database.config';
+import environmentValidation from './config/environment.validation';
 
+/** 
+ * ENV which stores the current environment
+ * */
 const ENV = process.env.NODE_ENV;
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      // envFilePath: ['.env.development'],
       envFilePath: !ENV ? '.env' : `.env.${ENV}`,
-      load: [appConfig],
+      load: [appConfig, databaseConfig],
+      validationSchema: environmentValidation,
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const databaseUrl = configService.get<string>('DATABASE_URL');
-        const synchronize = configService.get<boolean>('SYNCHRONIZE');
+        const databaseUrl = configService.get<string>('database.databaseUrl');
+        const synchronize = configService.get<boolean>('database.synchronize');
+        const autoLoadEntities = configService.get<boolean>('database.autoLoadEntities');
 
         return {
           type: 'postgres',
           url: databaseUrl,
-          autoLoadEntities: true,
+          autoLoadEntities,
           synchronize,
         };
       },
@@ -53,4 +60,4 @@ const ENV = process.env.NODE_ENV;
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

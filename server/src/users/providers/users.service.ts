@@ -1,12 +1,13 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConfigService } from '@nestjs/config';
+import { ConfigType } from '@nestjs/config';
 
 import { User } from '../user.entity';
 
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { AuthService } from 'src/auth/providers/auth.service';
+import profileConfig from '../config/profile.config';
 
 /**
  * created a user service
@@ -16,10 +17,11 @@ import { AuthService } from 'src/auth/providers/auth.service';
 export class UsersService {
   constructor(
     /**
-     * Injecting ConfigService
+     * Injecting profileConfiguration
      * @property
      * */
-    private readonly configService: ConfigService,
+    @Inject(profileConfig.KEY)
+    private readonly profileConfiguration: ConfigType<typeof profileConfig>,
 
     /**
      * Injecting AuthService
@@ -32,7 +34,7 @@ export class UsersService {
      * */
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   /**
    * 1. Checks for existing user with same email
@@ -63,8 +65,8 @@ export class UsersService {
    * @function
    */
   public async findAll() {
-    const DatabaseUrl = this.configService.get<string>('DATABASE_URL');
-    console.log(DatabaseUrl);
+    const apiKey = this.profileConfiguration.apiKey;
+    console.log(apiKey);
 
     const isAuth = this.authService.isAuth();
     if (!isAuth) {
