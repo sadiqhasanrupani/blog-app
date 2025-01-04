@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 // app module classes
 import { AppController } from './app.controller';
@@ -14,26 +15,34 @@ import { AuthModule } from './auth/auth.module';
 import { TagsModule } from './tags/tags.module';
 import { MetaOptionsModule } from './meta-options/meta-options.module';
 import { DrizzleModule } from './drizzle/drizzle.module';
-import { ConfigModule } from '@nestjs/config';
+
+import { appConfig } from './config/app.config';
+
+const ENV = process.env.NODE_ENV;
 
 @Module({
   imports: [
-    TypeOrmModule.forRootAsync({
-      imports: [],
-      inject: [],
-      useFactory: () => ({
-        type: 'postgres',
-        url: 'postgres://postgres:newpassword@localhost:5432/blogify?sslmode=disable',
-        autoLoadEntities: true,
-        /**
-         * ONLY FOR DEVELOPMENT
-         * */
-        synchronize: true,
-
-        // entities: [User],
-      }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      // envFilePath: ['.env.development'],
+      envFilePath: !ENV ? '.env' : `.env.${ENV}`,
+      load: [appConfig],
     }),
-    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.get<string>('DATABASE_URL');
+        const synchronize = configService.get<boolean>('SYNCHRONIZE');
+
+        return {
+          type: 'postgres',
+          url: databaseUrl,
+          autoLoadEntities: true,
+          synchronize,
+        };
+      },
+    }),
     UsersModule,
     PostModule,
     AuthModule,

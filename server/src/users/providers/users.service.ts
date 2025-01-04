@@ -1,6 +1,7 @@
 import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 
 import { User } from '../user.entity';
 
@@ -14,6 +15,12 @@ import { AuthService } from 'src/auth/providers/auth.service';
 @Injectable()
 export class UsersService {
   constructor(
+    /**
+     * Injecting ConfigService
+     * @property
+     * */
+    private readonly configService: ConfigService,
+
     /**
      * Injecting AuthService
      */
@@ -56,6 +63,9 @@ export class UsersService {
    * @function
    */
   public async findAll() {
+    const DatabaseUrl = this.configService.get<string>('DATABASE_URL');
+    console.log(DatabaseUrl);
+
     const isAuth = this.authService.isAuth();
     if (!isAuth) {
       return { message: 'Unauthorized User' };
