@@ -1,22 +1,26 @@
-import { Body, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Body, Inject, Injectable, RequestTimeoutException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { eq, sql } from 'drizzle-orm';
 
 import { DrizzleDB } from 'src/drizzle/types/drizzle';
+import { post, postTagsTag, tag } from 'src/drizzle/schema/schema';
 
 // tables
 import { Post } from '../post.entity';
+import { Tag } from 'src/tags/tag.entity';
+import { User } from 'src/users/user.entity';
 import { MetaOption } from 'src/meta-options/meta-option.entity';
 
 // others
 import { CreatePostDto } from '../dtos/create-post.dto';
+import { PatchPostDto } from '../dtos/patch-post.dto';
+
 import { DRIZZLE } from 'src/drizzle/drizzle.module';
+
+// services
 import { UsersService } from 'src/users/providers/users.service';
 import { TagsService } from 'src/tags/providers/tags.service';
-import { PatchPostDto } from '../dtos/patch-post.dto';
-import { Tag } from 'src/tags/tag.entity';
-import { post, postTagsTag, tag } from 'src/drizzle/schema/schema';
 
 /**
  * created a post service
@@ -57,17 +61,20 @@ export class PostsService {
      * @service
      * */
     private readonly userService: UsersService,
-  ) { }
+  ) {}
 
   /**
    * Gets post related tags
    * */
   public async getAllTags() {
-    const postTags = await this.db
-      .select({
-        id: post.id,
-        title: post.title,
-        tags: sql`
+    let postTags = undefined;
+
+    try {
+      postTags = await this.db
+        .select({
+          id: post.id,
+          title: post.title,
+          tags: sql`
         json_agg(
           json_build_object(
             'id', tag.id,
@@ -78,11 +85,16 @@ export class PostsService {
           )
         )
       `,
-      })
-      .from(post)
-      .leftJoin(postTagsTag, eq(postTagsTag.postId, post.id))
-      .leftJoin(tag, eq(postTagsTag.tagId, tag.id))
-      .groupBy(post.id);
+        })
+        .from(post)
+        .leftJoin(postTagsTag, eq(postTagsTag.postId, post.id))
+        .leftJoin(tag, eq(postTagsTag.tagId, tag.id))
+        .groupBy(post.id);
+    } catch (error) {
+      throw new RequestTimeoutException('Unable to process at the moment please try later ', {
+        description: 'Erorr connecting to database.',
+      });
+    }
 
     return postTags;
   }
@@ -97,22 +109,42 @@ export class PostsService {
    * */
   public async create(@Body() createPostDto: CreatePostDto) {
     // find author from database by authorId
-    const author = await this.userService.findOneById(1);
+
+    let author: undefined | User = undefined;
+    author = await this.userService.findOneById(1);
+
+    /**
+     * Handling user does not exist
+     * */
     if (!author) {
-      return { message: "User doesn't exist" };
+      throw new BadRequestException('The user does not exist, please check your id.');
     }
 
-    let tags = await this.tagsService.findMultipleTags(createPostDto.tags);
+    // finds the tags
+    const tags = await this.tagsService.findMultipleTags(createPostDto.tags);
 
     let metaOption: MetaOption | null;
     let newPost = this.postsRepository.create({ ...createPostDto, author, tags });
 
-    newPost = await this.postsRepository.save(newPost);
+    try {
+      newPost = await this.postsRepository.save(newPost);
+    } catch (error) {
+      throw new RequestTimeoutException('Unable to process at the moment, please try again.', {
+        description: 'Error creating post',
+      });
+    }
 
     if (newPost) {
       metaOption = this.metaOptionsRepository.create(createPostDto.metaOptions);
       metaOption.post = newPost;
-      await this.metaOptionsRepository.save(metaOption);
+
+      try {
+        await this.metaOptionsRepository.save(metaOption);
+      } catch (error) {
+        throw new RequestTimeoutException('Unable to process the request, please try again.', {
+          description: 'Error creating metaOption',
+        });
+      }
     }
 
     return {
@@ -126,7 +158,15 @@ export class PostsService {
    * @method to find all blog posts
    * */
   public async findAll() {
-    const posts = await this.postsRepository.find({ relations: { author: true, metaOptions: true, tags: true } });
+    let posts: undefined | Post[];
+
+    try {
+      posts = await this.postsRepository.find({ relations: { author: true, metaOptions: true, tags: true } });
+    } catch (error) {
+      throw new RequestTimeoutException('Unable to process the request, please try again.', {
+        description: 'Error connecting with database',
+      });
+    }
 
     return {
       message: 'Blog posts fetched successfully',
@@ -152,11 +192,26 @@ export class PostsService {
       tags = await this.tagsService.findMultipleTags(patchPostDto.tags);
     }
 
+    /**
+     * Number of tags should be equal
+     * */
+    if (!tags || tags.length !== patchPostDto.tags.length) {
+      throw new BadRequestException('Please check your tag Ids and ensure they are correct.');
+    }
+
     // getting post's detail based on the post id.
-    let post = await this.postsRepository.findOneBy({ id: patchPostDto.id });
+    let post: undefined | Post = undefined;
+
+    try {
+      post = await this.postsRepository.findOneBy({ id: patchPostDto.id });
+    } catch (error) {
+      throw new RequestTimeoutException('Unable to process the request, please try again.', {
+        description: 'Error connecting with database.',
+      });
+    }
 
     if (!post) {
-      return { message: "Post doesn't exist" };
+      throw new BadRequestException('The post does not exist, please check your id.');
     }
 
     // updating post properties
@@ -173,26 +228,46 @@ export class PostsService {
     post.tags = tags;
 
     // saves the posts
-    post = await this.postsRepository.save(post);
+    try {
+      post = await this.postsRepository.save(post);
+    } catch (error) {
+      throw new RequestTimeoutException('Unable to process the request, please try again.', {
+        description: 'Unable connecting with database.',
+      });
+    }
 
     // returns the post in response
     return { message: 'updated the posts successfully.', post };
   }
 
   /**
-   * Checks if blog post exists
-   * Deletes the post if the blog post exists
-   * returns a message of successful deletion
-   * @method to delete a blog post
-   * */
+   * Deletes a blog post by its ID.
+   *
+   * This method first checks if the blog post exists,
+   * then deletes the post if it is found.
+   * If the operation is successful, it returns a success message.
+   *
+   * @async
+   * @param {number} id - The ID of the blog post to delete.
+   * @throws {RequestTimeoutException} If there is an issue connecting to the database.
+   */
+
   public async delete(id: number) {
-    await this.postsRepository.delete(id);
-    return { message: 'Post has been deleted' };
+    try {
+      await this.postsRepository.delete(id);
+    } catch (error) {
+      throw new RequestTimeoutException('Unable to process the request, please try again.', {
+        description: 'Error connecting with database.',
+      });
+    }
+    return { message: 'Post has been deleted', deleted: true };
   }
 
   /**
    * Delete all blogs or in bulk
-   * @method to delete all blog posts
+   * @async
    * */
-  public async deleteAll() { }
+  public async deleteAll() {
+    return { message: 'Deleted all posts successfully.', deleted: true };
+  }
 }

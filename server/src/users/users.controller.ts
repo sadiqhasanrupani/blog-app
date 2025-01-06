@@ -6,6 +6,7 @@ import { UsersService } from './providers/users.service';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { GetUsersParamDto } from './dtos/get-users-param.dto';
 import { PatchUserDto } from './dtos/patch-user.dto';
+import { CreateManyUsersDto } from './dtos/create-many-users.dto';
 
 /**
  * created a user controller
@@ -14,7 +15,7 @@ import { PatchUserDto } from './dtos/patch-user.dto';
 @Controller('users')
 @ApiTags('Users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   /**
    * created a user function that will fetch all the users
@@ -55,11 +56,23 @@ export class UsersController {
    * created a user function that will create a new user
    * @function
    */
+  @ApiOperation({ summary: 'Creates a new user' })
+  @ApiResponse({ status: 200, description: 'User created successfully' })
   @Post()
-  public createUser(@Body() createUserDto: CreateUserDto) {
-    const response = this.usersService.createUser(createUserDto);
+  public create(@Body() createUserDto: CreateUserDto) {
+    const response = this.usersService.create(createUserDto);
 
     return response;
+  }
+
+  /**
+   * Create multiple users
+   * */
+  @ApiOperation({ summary: 'Creates multiple users' })
+  @ApiResponse({ status: 200, description: 'User created successfully' })
+  @Post('create-many')
+  public createManyUsers(@Body() createManyUsersDto: CreateManyUsersDto) {
+    return this.usersService.createMany(createManyUsersDto);
   }
 
   /**

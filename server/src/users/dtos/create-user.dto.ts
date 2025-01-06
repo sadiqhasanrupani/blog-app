@@ -1,12 +1,4 @@
-import {
-  IsString,
-  IsEmail,
-  IsNotEmpty,
-  IsOptional,
-  MinLength,
-  Matches,
-  IsNumber,
-} from 'class-validator';
+import { IsString, IsEmail, IsNotEmpty, IsOptional, MinLength, Matches, IsNumber } from 'class-validator';
 
 export class CreateUserDto {
   @IsString({ message: 'First name must be a string' })
@@ -31,10 +23,6 @@ export class CreateUserDto {
       'Minimum 8 characters, at least one uppercase letter, one lowercase letter and one number or special character',
   })
   password: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  id: number;
 }
 
 export type UserBody = CreateUserDto;

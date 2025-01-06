@@ -1,13 +1,21 @@
-import { Injectable, Inject, forwardRef } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import {
+  Injectable,
+  Inject,
+  forwardRef,
+  RequestTimeoutException,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ConfigType } from '@nestjs/config';
 
 import { User } from '../user.entity';
 
 import { CreateUserDto } from '../dtos/create-user.dto';
 import { AuthService } from 'src/auth/providers/auth.service';
-import profileConfig from '../config/profile.config';
+import { UsersCreateManyProvider } from './users-create-many.provider';
+import { CreateManyUsersDto } from '../dtos/create-many-users.dto';
 
 /**
  * created a user service
@@ -16,13 +24,6 @@ import profileConfig from '../config/profile.config';
 @Injectable()
 export class UsersService {
   constructor(
-    /**
-     * Injecting profileConfiguration
-     * @property
-     * */
-    @Inject(profileConfig.KEY)
-    private readonly profileConfiguration: ConfigType<typeof profileConfig>,
-
     /**
      * Injecting AuthService
      */
@@ -33,7 +34,12 @@ export class UsersService {
      * Injecting UserRepository
      * */
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
+
+    /**
+     * Inject CreateUsersManyProvider
+     * */
+    private readonly createUsersManyProvider: UsersCreateManyProvider,
   ) {}
 
   /**
@@ -42,20 +48,37 @@ export class UsersService {
    * 3. Creates a new user
    * @function
    * */
-  public async createUser(createUserDto: CreateUserDto) {
-    const existingUser = await this.userRepository.find({
-      select: ['email', 'id'],
-      where: {
-        email: createUserDto.email,
-      },
-    });
+  public async create(createUserDto: CreateUserDto) {
+    let existingUser = undefined;
 
+    try {
+      existingUser = await this.userRepository.find({
+        select: ['email', 'id'],
+        where: {
+          email: createUserDto.email,
+        },
+      });
+    } catch (error) {
+      throw new RequestTimeoutException('Unable to process at the moment please try later ', {
+        description: 'Erorr connecting to database.',
+      });
+    }
+
+    /**
+     * Handle user does not exists
+     */
     if (existingUser.length > 0) {
-      return { message: 'User already exists' };
+      throw new BadRequestException('The user already exists, please check your email.');
     }
 
     let newUser = this.userRepository.create(createUserDto);
-    newUser = await this.userRepository.save(newUser);
+    try {
+      await this.userRepository.save(newUser);
+    } catch (error) {
+      throw new RequestTimeoutException('Unable to process at the moment please try later', {
+        description: 'Error creating user',
+      });
+    }
 
     return { message: 'User created successfully', newUser };
   }
@@ -65,27 +88,51 @@ export class UsersService {
    * @function
    */
   public async findAll() {
-    const apiKey = this.profileConfiguration.apiKey;
-    console.log(apiKey);
-
     const isAuth = this.authService.isAuth();
     if (!isAuth) {
       return { message: 'Unauthorized User' };
     }
 
-    const users = await this.userRepository.find();
+    let users: undefined | User[];
+
+    try {
+      users = await this.userRepository.find();
+    } catch (error) {
+      throw new HttpException(
+        {
+          statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: 'Unable to process at the moment please try later',
+          message: 'Something went wrong please try again later.',
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        { description: error.message, cause: error },
+      );
+    }
+
     return users;
   }
 
   /**
    * created a method findOne which finds one user detail based on their correct id.
    * @function to get user by ID.
-   * @returns false | Promise<User>
+   * @exceptions are handled here.
    */
   public async findOneById(id: number) {
-    const user = await this.userRepository.findOne({ where: { id } });
+    let user: undefined | User;
+
+    try {
+      user = await this.userRepository.findOne({ where: { id } });
+    } catch (error) {
+      throw new RequestTimeoutException('Unable to process at the moment please try later', {
+        description: 'Erorr connecting to database.',
+      });
+    }
+
+    /**
+     * Handle user does not exists
+     */
     if (!user) {
-      return false;
+      throw new BadRequestException('The user does not exist, please check your id.');
     }
 
     return user;
@@ -97,11 +144,28 @@ export class UsersService {
    * @returns false | Promise<User>
    */
   public async findOneByEmail(email: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
+    let user: User | undefined;
+
+    try {
+      user = await this.userRepository.findOne({ where: { email } });
+    } catch (error) {
+      throw new RequestTimeoutException('Unable to process at the moment please try later', {
+        description: 'Erorr connecting to database.',
+      });
+    }
+
+    /**
+     * Handle user does not exists
+     */
     if (!user) {
-      return false;
+      throw new BadRequestException('The user does not exist, please check your email.');
     }
 
     return user;
+  }
+
+  public async createMany(createManyUsersDto: CreateManyUsersDto) {
+    const createdUsers = await this.createUsersManyProvider.createMany(createManyUsersDto.users);
+    return { message: 'Users created successfully', users: createdUsers };
   }
 }
