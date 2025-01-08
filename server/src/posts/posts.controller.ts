@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { PostsService } from './providers/posts.service';
@@ -6,6 +6,7 @@ import { PostsService } from './providers/posts.service';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { PatchPostDto } from './dtos/patch-post.dto';
 import { DeletePostParamDto } from './dtos/delete-post-param.dto';
+import { GetPostsDto } from './dtos/get-posts.dto';
 
 /**
  * created a post controller
@@ -15,6 +16,14 @@ import { DeletePostParamDto } from './dtos/delete-post-param.dto';
 @ApiTags('Posts')
 export class PostsController {
   constructor(private readonly postsService: PostsService) { }
+
+  /**
+   * Gets paginated posts
+   * */
+  @Get('/:userId?')
+  public getPosts(@Param('userId') userId: string, @Query() postQuery: GetPostsDto) {
+    return { userId, query: postQuery };
+  }
 
   /**
    * @method to get posts with tags
