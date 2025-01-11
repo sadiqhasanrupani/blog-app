@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { PostsService } from './providers/posts.service';
@@ -22,7 +22,7 @@ export class PostsController {
    * */
   @Get('/:userId?')
   public getPosts(@Param('userId') userId: string, @Query() postQuery: GetPostsDto) {
-    return { userId, query: postQuery };
+    return this.postsService.findAll(userId, postQuery);
   }
 
   /**
@@ -43,10 +43,6 @@ export class PostsController {
    * created a findAll method that will find all posts based on their id.
    * @function
    */
-  @Get()
-  findAll() {
-    return this.postsService.findAll();
-  }
 
   /**
    * creates a new blog post

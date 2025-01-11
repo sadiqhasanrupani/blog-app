@@ -97,7 +97,6 @@ export class CreatePostDto {
     example: '2024-03-16',
   })
   @IsOptional()
-  @IsISO8601()
   publishOn?: Date;
 
   @ApiPropertyOptional({

@@ -21,6 +21,7 @@ import { DRIZZLE } from 'src/drizzle/drizzle.module';
 // services
 import { UsersService } from 'src/users/providers/users.service';
 import { TagsService } from 'src/tags/providers/tags.service';
+import { GetPostsDto } from '../dtos/get-posts.dto';
 
 /**
  * created a post service
@@ -61,7 +62,7 @@ export class PostsService {
      * @service
      * */
     private readonly userService: UsersService,
-  ) {}
+  ) { }
 
   /**
    * Gets post related tags
@@ -111,7 +112,7 @@ export class PostsService {
     // find author from database by authorId
 
     let author: undefined | User = undefined;
-    author = await this.userService.findOneById(1);
+    author = await this.userService.findOneById(createPostDto.authorId);
 
     /**
      * Handling user does not exist
@@ -157,21 +158,19 @@ export class PostsService {
    * Find all blog posts
    * @method to find all blog posts
    * */
-  public async findAll() {
-    let posts: undefined | Post[];
+  public async findAll(userId: string, postQuery: GetPostsDto) {
+    const { limit, page } = postQuery;
 
-    try {
-      posts = await this.postsRepository.find({ relations: { author: true, metaOptions: true, tags: true } });
-    } catch (error) {
-      throw new RequestTimeoutException('Unable to process the request, please try again.', {
-        description: 'Error connecting with database',
-      });
-    }
-
-    return {
-      message: 'Blog posts fetched successfully',
-      posts,
-    };
+    return this.postsRepository.find({
+      relations: {
+        metaOptions: true,
+        tags: true,
+        author: true,
+      },
+      skip: (page - 1) * limit,
+      take: limit,
+      // where: { author: { id: userId } },
+    });
   }
 
   /**
