@@ -15,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
 import { TagsModule } from './tags/tags.module';
 import { MetaOptionsModule } from './meta-options/meta-options.module';
 import { DrizzleModule } from './drizzle/drizzle.module';
+import { PaginationModule } from './common/pagination/pagination.module';
 
 // configs
 import appConfig from './config/app.config';
@@ -56,6 +57,7 @@ const ENV = process.env.NODE_ENV;
     TagsModule,
     MetaOptionsModule,
     DrizzleModule,
+    PaginationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

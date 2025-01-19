@@ -22,6 +22,7 @@ import { DRIZZLE } from 'src/drizzle/drizzle.module';
 import { UsersService } from 'src/users/providers/users.service';
 import { TagsService } from 'src/tags/providers/tags.service';
 import { GetPostsDto } from '../dtos/get-posts.dto';
+import { PaginationProvider } from 'src/common/pagination/providers/pagination';
 
 /**
  * created a post service
@@ -62,7 +63,13 @@ export class PostsService {
      * @service
      * */
     private readonly userService: UsersService,
-  ) { }
+
+    /**
+     * Injecting PaginationProvider
+     * @provider
+     * */
+    private readonly paginationProvider: PaginationProvider,
+  ) {}
 
   /**
    * Gets post related tags
@@ -158,19 +165,9 @@ export class PostsService {
    * Find all blog posts
    * @method to find all blog posts
    * */
-  public async findAll(userId: string, postQuery: GetPostsDto) {
-    const { limit, page } = postQuery;
-
-    return this.postsRepository.find({
-      relations: {
-        metaOptions: true,
-        tags: true,
-        author: true,
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-      // where: { author: { id: userId } },
-    });
+  public async findAll(postQuery: GetPostsDto) {
+    const results = this.paginationProvider.paginateQuery<Post>(postQuery, this.postsRepository);
+    return results;
   }
 
   /**
