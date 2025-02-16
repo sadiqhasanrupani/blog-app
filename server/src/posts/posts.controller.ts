@@ -21,8 +21,8 @@ export class PostsController {
    * Gets paginated posts
    * */
   @Get('/:userId?')
-  public getPosts(@Param('userId') userId: string, @Query() postQuery: GetPostsDto) {
-    return this.postsService.findAll(userId, postQuery);
+  public getPosts(@Query() postQuery: GetPostsDto) {
+    return this.postsService.findAll(postQuery);
   }
 
   /**
